@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from subscribers_app.views import SubscriberList, SubscriberSMSList, ClientList, UsersList
+from subscriber_app.views import SubscriberList, SubscriberSMSList, ClientList, UsersList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
