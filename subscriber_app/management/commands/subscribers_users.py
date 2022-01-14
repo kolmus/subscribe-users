@@ -39,9 +39,12 @@ class Command(BaseCommand):
         for subscriber in subscribers:
             if subscriber.email in user_emails:
                 continue  # to change in bonus task
-            elif clients.filter(email=subscriber.email).exists():  # client.email = subscriber.email
+
+            # client.email = subscriber.email
+            elif clients.filter(email=subscriber.email).exists():
                 client = clients.filter(email=subscriber.email).first()
-                if not users.filter(phone=client.phone).exclude(email=client.email).exists():  # and not(user.phone = client.phone and user.email != client.email)
+                # and not(user.phone = client.phone and user.email != client.email)
+                if not users.filter(phone=client.phone).exclude(email=client.email).exists():
                     # make new user based on client
                     if client.phone not in clients_ext_phones:
                         migrated_users.append(
@@ -67,10 +70,12 @@ class Command(BaseCommand):
             if smssubscriber.phone in user_phones:
                 continue  # to change in bonus task
 
-            elif clients.filter(phone=smssubscriber.phone).exists():  # client.phone = smssubscriber.phone
+            # client.phone = smssubscriber.phone
+            elif clients.filter(phone=smssubscriber.phone).exists():
                 client = clients.filter(phone=smssubscriber.phone).first()
 
-                if not users.filter(email=client.email).exclude(phone=client.phone).exists():  # and not(user.email = client.email and user.phone != client.phone)
+                # and not(user.email = client.email and user.phone != client.phone)
+                if not users.filter(email=client.email).exclude(phone=client.phone).exists():
                     # make new user based on client
                     if client.phone not in clients_ext_phones:
                         migrated_users.append(
