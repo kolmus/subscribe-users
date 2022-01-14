@@ -9,7 +9,6 @@ class Command(BaseCommand):
         """Updates Users gdpr_consent in necessary objects"""
         users = Users.objects.all()
         subscribers = Subscriber.objects.all()
-        clients = Client.objects.all()
         sms_subscribers = SubscriberSMS.objects.all()
 
         sub_emails = []

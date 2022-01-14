@@ -1,4 +1,3 @@
-from pickle import NONE
 from django.core.management.base import BaseCommand
 from subscriber_app.models import Subscriber, Client, SubscriberSMS, Users
 import csv
