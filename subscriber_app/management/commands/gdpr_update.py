@@ -7,20 +7,21 @@ from subscriber_app.models import Subscriber, Client, SubscriberSMS, Users
 class Command(BaseCommand):
     def handle(self, *args, **options):
         """Updates Users gdpr_consent in necessary objects"""
-        users = Users.objects.all()
         subscribers = Subscriber.objects.all()
         sms_subscribers = SubscriberSMS.objects.all()
 
-        sub_emails = []
+        sub_emails = set()
         for sub in subscribers:
-            sub_emails.append(sub.email)
+            sub_emails.add(sub.email)
 
-        subsms_phones = []
+        subsms_phones = set()
         for subsms in sms_subscribers:
-            sub_emails.append(subsms.phone)
+            subsms_phones.add(subsms.phone)
+
+        users = Users.objects.filter(Q(email__in=sub_emails) | Q(phone__in=subsms_phones))
 
         users_to_update = []
-        for user in users.filter(Q(email__in=sub_emails) | Q(phone__in=subsms_phones)):
+        for user in users:
             # exists subscriber and subscriber_sms
             if user.email in sub_emails and user.phone in subsms_phones:
                 subscriber = subscribers.get(email=user.email)

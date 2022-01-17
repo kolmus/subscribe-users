@@ -11,17 +11,15 @@ class Command(BaseCommand):
         """
 
         users = Users.objects.all()
-        subscribers = Subscriber.objects.all()
         clients = Client.objects.all()
-        sms_subscribers = SubscriberSMS.objects.all()
 
-        user_emails = []
-        user_phones = []
+        user_emails = set()
+        user_phones = set()
         for user in users:
-            user_emails.append(user.email)
-            user_phones.append(user.phone)
+            user_emails.add(user.email)
+            user_phones.add(user.phone)
 
-        clients_phone = []
+        clients_phone = set()
         clients_ext_phones = []
         for client in clients:
             if client.phone in clients_phone:
@@ -31,17 +29,15 @@ class Command(BaseCommand):
                     extension_writer.writerow([client.id, client.email])
                 clients_ext_phones.append(client.phone)
             else:
-                clients_phone.append(client.phone)
+                clients_phone.add(client.phone)
 
         migrated_users = []
 
+        subscribers = Subscriber.objects.all().exclude(email__in=user_emails)
         # Subscriber migration to Users
         for subscriber in subscribers:
-            if subscriber.email in user_emails:
-                continue  # to change in bonus task
-
             # client.email = subscriber.email
-            elif clients.filter(email=subscriber.email).exists():
+            if clients.filter(email=subscriber.email).exists():
                 client = clients.filter(email=subscriber.email).first()
                 # and not(user.phone = client.phone and user.email != client.email)
                 if not users.filter(phone=client.phone).exclude(email=client.email).exists():
@@ -65,14 +61,12 @@ class Command(BaseCommand):
                 # make user without phone, based on subscriber
                 migrated_users.append(Users(email=subscriber.email, gdpr_consent=subscriber.gdpr_consent))
 
+        sms_subscribers = SubscriberSMS.objects.all().exclude(phone__in=user_phones)
         # SubscriberSMS migration to Users
         for smssubscriber in sms_subscribers:
-            if smssubscriber.phone in user_phones:
-                continue  # to change in bonus task
-
             # client.phone = smssubscriber.phone
-            elif clients.filter(phone=smssubscriber.phone).exists():
-                client = clients.filter(phone=smssubscriber.phone).first()
+            if clients.filter(phone=smssubscriber.phone).exists():
+                client = clients.get(phone=smssubscriber.phone)
 
                 # and not(user.email = client.email and user.phone != client.phone)
                 if not users.filter(email=client.email).exclude(phone=client.phone).exists():
